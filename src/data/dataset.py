@@ -61,7 +61,7 @@ class RefCOCOgDatasetProcessor:
         return self.min_words <= n_words <= self.max_words
 
     def process(self) -> str:
-        print("🔍 开始解析 RefCOCOg 标注文件...")
+        print(" 开始解析 RefCOCOg 标注文件...")
 
         with open(self.instances_file, "r", encoding="utf-8") as f:
             instances = json.load(f)
@@ -154,7 +154,7 @@ class RefCOCOgDatasetProcessor:
         with open(self.out_file, "w", encoding="utf-8") as f:
             json.dump(grounding_samples, f, ensure_ascii=False, indent=2)
 
-        print(f"✅ 数据预处理完成！")
+        print(f" 数据预处理完成！")
         print(f"   split: {self.split}")
         print(f"   grounding samples: {len(grounding_samples)}")
         print(f"   saved to: {self.out_file}")
@@ -225,7 +225,7 @@ class RefCOCOGroundingDataset(Dataset):
         else:
             self.samples = self.annotations
 
-        print(f"📦 加载 RefCOCOg grounding dataset: {len(self.samples)} samples")
+        print(f"加载 RefCOCOg grounding dataset: {len(self.samples)} samples")
         print(f"   source json: {json_path}")
         print(f"   image dir: {img_dir}")
         print(f"   group_by_image: {group_by_image}")
