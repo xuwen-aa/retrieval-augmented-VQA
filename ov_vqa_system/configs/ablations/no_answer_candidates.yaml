@@ -1,0 +1,10 @@
+experiment:
+  name: ablation_no_answer_candidates
+
+reasoning:
+  use_answer_candidates: false
+  constrain_to_candidates: false
+  candidate_selection_mode: freeform
+
+output:
+  output_dir: outputs/okvqa/ablation_no_answer_candidates

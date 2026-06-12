@@ -1,0 +1,10 @@
+
+experiment:
+  name: ablation_no_short_answer_constraint
+
+reasoning:
+  short_answer: false
+  max_answer_words: null
+
+output:
+  output_dir: outputs/okvqa/ablation_no_short_answer_constraint

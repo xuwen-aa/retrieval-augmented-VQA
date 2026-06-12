@@ -1,0 +1,123 @@
+# ============================================================
+# OK-VQA full experiment config
+# This config overrides configs/default.yaml.
+# ============================================================
+
+experiment:
+  name: okvqa_ours_full
+  output_dir: outputs/okvqa/ours_full
+  seed: 42
+  save_intermediate: true
+  save_predictions: true
+  overwrite: true
+
+data:
+  dataset_name: okvqa
+
+  # OK-VQA raw files are stored here.
+  # The loader will automatically find:
+  # - OpenEnded_mscoco_val2014_questions.json
+  # - mscoco_val2014_annotations.json
+  annotation_path: data/raw/vqa
+
+  # COCO images root.
+  # In AutoDL this should point to your shared image directory.
+  image_root: /root/autodl-tmp/data/common_images
+
+  split: val
+  coco_split: val2014
+
+  # For smoke test, override from command line:
+  # --limit 50
+  limit: null
+
+  # Set true only when debugging image path problems.
+  check_image_exists: false
+
+detector:
+  name: yolo_world
+
+  # Full model uses RefCOCOg-adapted YOLO-World.
+  model_path: /root/autodl-tmp/yoloworld_finetune/runs/detect/checkpoints/detector_refcocog/weights/best.pt
+
+  # Used by no_offline_alignment ablation.
+  original_model_path: /root/autodl-tmp/yoloworld_finetune/yolov8s-world.pt
+
+  device: cuda:0
+  image_size: 640
+
+  conf_threshold: 0.05
+  iou_threshold: 0.70
+  max_detections: 20
+  max_prompts: 12
+
+concept:
+  enabled: true
+
+  # Main setting for our full model.
+  # Options:
+  # - question
+  # - noun_phrases
+  # - llm_concepts
+  # - llm_concepts_knowledge
+  strategy: llm_concepts_knowledge
+
+  max_raw_concepts: 12
+  max_selected_concepts: 5
+  use_knowledge_for_concepts: true
+
+retrieval:
+  enabled: true
+
+  index_path: data/retrieval/wikipedia_bge.index
+  corpus_path: data/retrieval/passages_mapping.json
+
+  embedding_model: BAAI/bge-m3
+  device: cuda
+  top_k: 10
+  normalize_embeddings: true
+  query_prefix: ""
+
+reranker:
+  enabled: true
+  model_name: BAAI/bge-reranker-base
+  top_k: 5
+  device: cuda:0
+
+llm:
+  provider: ollama
+  model_name: llama3
+  base_url: http://localhost:11434
+
+  temperature: 0.0
+  top_p: 0.9
+  max_tokens: 150
+  timeout: 60
+
+  stop:
+    - "User Input:"
+    - "Instruction:"
+
+  raise_on_error: true
+
+reasoning:
+  structured: true
+  use_answer_candidates: true
+  max_answer_candidates: 8
+  short_answer: true
+  max_answer_words: 5
+  evidence_constraint: true
+  allow_insufficient: false
+
+evaluation:
+  metric: vqa_accuracy
+  answer_type: open
+  normalize_answer: true
+
+output:
+  predictions_file: predictions.jsonl
+  intermediate_file: intermediate.jsonl
+  metrics_file: metrics.json
+  config_file: config.yaml
+  command_file: command.txt
+  log_file: run.log

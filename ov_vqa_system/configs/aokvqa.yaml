@@ -1,0 +1,120 @@
+experiment:
+  name: aokvqa_clean_llmconcepts_no_retrieval
+  dataset_name: aokvqa
+  seed: 42
+
+dataset:
+  name: aokvqa
+  split: val
+
+  # Official A-OKVQA annotation file.
+  # Adjust this path after downloading A-OKVQA.
+  annotation_path: data/raw/aokvqa/aokvqa_v1p0_val.json
+
+  # COCO image directory.
+  # The loader should support plain 12-digit COCO names:
+  #   000000123456.jpg
+  # and optionally COCO-style names:
+  #   COCO_val2017_000000123456.jpg
+  image_root: /root/autodl-tmp/data/common_images
+
+  # Optional limit. Leave null for full validation split.
+  limit: null
+
+  # Keep false here. Use CLI --shuffle for randomized evaluation.
+  shuffle: false
+
+detector:
+  enabled: true
+  type: yolo_world
+
+  # Main detector checkpoint.
+  # The original YOLO-World checkpoint is more stable than the RefCOCOg-adapted one.
+  model_path: /root/autodl-tmp/yoloworld_finetune/yolov8s-world.pt
+
+  device: cuda
+  conf_threshold: 0.05
+  iou_threshold: 0.7
+  max_prompts: 5
+  max_detections: 20
+
+concept:
+  enabled: true
+
+  # Current stable setting.
+  # LLM-generated visual concepts are better detection prompts than raw noun phrases.
+  strategy: llm_concepts
+
+  # Important: keep knowledge expansion off for the clean mainline.
+  use_knowledge_for_concepts: false
+
+  max_selected_concepts: 5
+  max_total_prompts: 5
+
+retrieval:
+  enabled: false
+
+  # Kept here for ablation only.
+  index_path: data/retrieval/wikipedia_bge.index
+  mapping_path: data/retrieval/passages_mapping.json
+  model_name_or_path: /root/.cache/huggingface/hub/models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181
+
+  device: cuda
+  top_k: 10
+  batch_size: 16
+  normalize_embeddings: true
+
+reranker:
+  enabled: false
+
+  # Kept here for ablation only.
+  model_name_or_path: /root/.cache/huggingface/hub/models--BAAI--bge-reranker-base/snapshots/2cfc18c9415c912f9d8155881c133215df768a70
+  device: cuda
+  top_k: 5
+  batch_size: 8
+
+llm:
+  provider: ollama
+  model_name: llama3
+  base_url: http://localhost:11434
+
+  temperature: 0.1
+  top_p: 0.9
+  num_predict: 150
+
+reasoning:
+  structured: true
+
+  # Mainline: free-form short answer.
+  use_answer_candidates: false
+  constrain_to_candidates: false
+  candidate_selection_mode: freeform
+
+  short_answer: true
+  max_answer_words: 5
+
+  # For A-OKVQA multiple-choice ablation only.
+  use_choices_as_candidates: false
+
+evaluation:
+  metric: aokvqa
+
+  # A-OKVQA supports both:
+  #   direct_answer
+  #   multiple_choice
+  #   both
+  #
+  # The current pipeline mainly produces direct short answers.
+  task: direct_answer
+
+  normalize: true
+
+output:
+  output_dir: outputs/aokvqa/aokvqa_clean_llmconcepts_no_retrieval
+  save_predictions: true
+  save_intermediate: true
+  save_metrics: true
+
+logging:
+  level: INFO
+  log_every: 1

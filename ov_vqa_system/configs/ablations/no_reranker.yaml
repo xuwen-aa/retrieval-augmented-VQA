@@ -1,0 +1,11 @@
+experiment:
+  name: ablation_no_reranker
+
+retrieval:
+  enabled: true
+
+reranker:
+  enabled: false
+
+output:
+  output_dir: outputs/okvqa/ablation_no_reranker

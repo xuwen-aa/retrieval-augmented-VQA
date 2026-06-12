@@ -1,0 +1,168 @@
+# ============================================================
+# Default configuration for OV-VQA system
+# This file defines the shared settings for all experiments.
+# Dataset-specific and ablation configs should override this file.
+# ============================================================
+
+experiment:
+  name: default
+  seed: 42
+  output_dir: outputs/default
+  save_intermediate: true
+  save_predictions: true
+  overwrite: false
+
+# ============================================================
+# Data settings
+# ============================================================
+
+data:
+  dataset_name: okvqa
+
+  # Root directory for COCO-style images.
+  # For your AutoDL environment, this should usually be:
+  # /root/autodl-tmp/data/common_images
+  image_root: /root/autodl-tmp/data/common_images
+
+  # Annotation path should be overridden by okvqa.yaml / aokvqa.yaml
+  annotation_path: null
+
+  # Optional limit for smoke tests.
+  # null means full dataset.
+  limit: null
+
+# ============================================================
+# Detector settings
+# ============================================================
+
+detector:
+  name: yolo_world
+
+  # Full model should use the RefCOCOg-adapted checkpoint.
+  model_path: /root/autodl-tmp/yoloworld_finetune/runs/detect/checkpoints/detector_refcocog/weights/best.pt
+
+  # Original YOLO-World checkpoint.
+  # This is used by the no_offline_alignment ablation.
+  original_model_path: /root/autodl-tmp/yoloworld_finetune/yolov8s-world.pt
+
+  device: cuda:0
+  image_size: 640
+
+  conf_threshold: 0.25
+  iou_threshold: 0.70
+  max_detections: 20
+
+  # Maximum number of prompts sent to YOLO-World per question.
+  max_prompts: 5
+
+# ============================================================
+# Concept generation and prompt construction
+# ============================================================
+
+concept:
+  enabled: true
+
+  # Options:
+  # - question
+  # - noun_phrases
+  # - llm_concepts
+  # - llm_concepts_knowledge
+  strategy: llm_concepts_knowledge
+
+  max_raw_concepts: 12
+  max_selected_concepts: 5
+
+  # Whether retrieved knowledge is allowed to expand concept candidates.
+  use_knowledge_for_concepts: true
+
+# ============================================================
+# Retrieval settings
+# ============================================================
+
+retrieval:
+  enabled: true
+
+  index_path: data/retrieval/wikipedia_bge.index
+  corpus_path: data/retrieval/passages_mapping.json
+
+  embedding_model: BAAI/bge-m3
+  device: cuda
+  top_k: 10
+  normalize_embeddings: true
+  query_prefix: ""
+
+# ============================================================
+# Reranker settings
+# ============================================================
+
+reranker:
+  enabled: true
+  model_name: BAAI/bge-reranker-base
+  top_k: 5
+  device: cuda:0
+
+# ============================================================
+# LLM settings
+# ============================================================
+
+llm:
+  provider: ollama
+  model_name: llama3
+  base_url: http://localhost:11434
+
+  temperature: 0.0
+  top_p: 0.9
+  max_tokens: 150
+  timeout: 60
+
+  stop:
+    - "User Input:"
+    - "Instruction:"
+
+  raise_on_error: true
+
+# ============================================================
+# Reasoning settings
+# ============================================================
+
+reasoning:
+  structured: true
+
+  # Whether to use generated answer candidates.
+  use_answer_candidates: true
+  max_answer_candidates: 8
+
+  # Final answer should be short for VQA evaluation.
+  short_answer: true
+  max_answer_words: 5
+
+  # If true, prompt forces the LLM to only use visual evidence and retrieved knowledge.
+  evidence_constraint: true
+
+  # If evidence is weak, allow the model to say insufficient information.
+  allow_insufficient: false
+
+# ============================================================
+# Evaluation settings
+# ============================================================
+
+evaluation:
+  metric: vqa_accuracy
+
+  # For OK-VQA, use open-ended VQA accuracy.
+  # For A-OKVQA, override this to multiple_choice_accuracy if needed.
+  answer_type: open
+
+  normalize_answer: true
+
+# ============================================================
+# Output settings
+# ============================================================
+
+output:
+  predictions_file: predictions.jsonl
+  intermediate_file: intermediate.jsonl
+  metrics_file: metrics.json
+  config_file: config.yaml
+  command_file: command.txt
+  log_file: run.log

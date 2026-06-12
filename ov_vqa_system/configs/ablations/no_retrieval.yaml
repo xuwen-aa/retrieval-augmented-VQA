@@ -1,0 +1,14 @@
+experiment:
+  name: ablation_no_retrieval
+
+retrieval:
+  enabled: false
+
+reranker:
+  enabled: false
+
+concept:
+  use_knowledge_for_concepts: false
+
+output:
+  output_dir: outputs/okvqa/ablation_no_retrieval

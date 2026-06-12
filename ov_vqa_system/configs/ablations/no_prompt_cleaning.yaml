@@ -1,0 +1,15 @@
+experiment:
+  name: ablation_no_prompt_cleaning
+
+concept:
+  clean_prompts: false
+  use_prompt_cleaning: false
+
+detector:
+  clean_class_names: false
+
+reasoning:
+  clean_final_answer: true
+
+output:
+  output_dir: outputs/okvqa/ablation_no_prompt_cleaning
